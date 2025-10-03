@@ -1,2 +1,14 @@
-.DS_Store
+# Python
+__pycache__/
+*.py[cod]
+*.pytest_cache/
+venv/
 .env
+.env.local
+# IDEs
+.vscode/
+.idea/
+# Docker
+docker-compose.override.yml
+# Logs
+*.log
