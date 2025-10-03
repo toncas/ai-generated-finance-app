@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant ExportService
+    participant DB
+    participant Storage
+    
+    Client->>API: POST /data/export
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>ExportService: Generate export
+    ExportService->>DB: Get transactions
+    DB-->>ExportService: Transactions
+    ExportService->>DB: Get categories
+    DB-->>ExportService: Categories
+    ExportService->>DB: Get budgets
+    DB-->>ExportService: Budgets
+    ExportService->>DB: Get goals
+    DB-->>ExportService: Goals
+    ExportService->>ExportService: Format data (CSV/JSON)
+    ExportService->>Storage: Store file
+    Storage-->>ExportService: File URL
+    ExportService->>DB: Log export event
+    DB-->>ExportService: Logged
+    ExportService-->>API: Export URL
+    API-->>Client: 200 OK + download URL

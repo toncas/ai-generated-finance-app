@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Client
+    participant RateLimiter
+    participant API
+    participant Redis
+    participant Service
+    
+    Client->>RateLimiter: Request
+    RateLimiter->>Redis: Get request count
+    Redis-->>RateLimiter: Count: 95/100
+    alt Under Limit
+        RateLimiter->>Redis: Increment counter
+        Redis-->>RateLimiter: Count: 96/100
+        RateLimiter->>API: Forward request
+        API->>Service: Process
+        Service-->>API: Response
+        API-->>RateLimiter: Response
+        RateLimiter-->>Client: 200 OK + Headers
+        Note over Client: X-RateLimit-Remaining: 4
+    else Over Limit
+        RateLimiter-->>Client: 429 Too Many Requests
+        Note over Client: Retry-After: 60
+    end

@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant RecurringService
+    participant SchedulerService
+    participant DB
+    
+    Client->>API: POST /transactions/recurring
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>RecurringService: Create template
+    RecurringService->>DB: Validate category
+    DB-->>RecurringService: Category valid
+    RecurringService->>DB: Insert template
+    DB-->>RecurringService: Template created
+    RecurringService->>SchedulerService: Schedule next occurrence
+    SchedulerService->>SchedulerService: Calculate next date
+    SchedulerService->>DB: Create scheduled job
+    DB-->>SchedulerService: Job created
+    SchedulerService-->>RecurringService: Scheduled
+    RecurringService-->>API: Template created
+    API-->>Client: 201 Created

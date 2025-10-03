@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant AnalyticsService
+    participant DB
+    participant Cache
+    
+    Client->>API: GET /analytics/summary?period=month
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>AnalyticsService: Get summary
+    AnalyticsService->>Cache: Check cache
+    alt Cache Hit
+        Cache-->>AnalyticsService: Cached summary
+    else Cache Miss
+        AnalyticsService->>DB: Get period transactions
+        DB-->>AnalyticsService: Transactions
+        AnalyticsService->>DB: Get previous period data
+        DB-->>AnalyticsService: Previous data
+        AnalyticsService->>AnalyticsService: Calculate metrics
+        Note over AnalyticsService: Income, expenses, net,<br/>savings rate, top categories
+        AnalyticsService->>AnalyticsService: Calculate comparisons
+        AnalyticsService->>Cache: Store results (TTL: 1hr)
+        Cache-->>AnalyticsService: Cached
+    end
+    AnalyticsService-->>API: Summary data
+    API-->>Client: 200 OK + summary

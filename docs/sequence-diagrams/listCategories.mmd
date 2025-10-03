@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant CategoryService
+    participant DB
+    participant Cache
+    
+    Client->>API: GET /categories?type=expense
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>CategoryService: Get categories
+    CategoryService->>Cache: Check cache
+    alt Cache Hit
+        Cache-->>CategoryService: Cached categories
+    else Cache Miss
+        CategoryService->>DB: Get system categories
+        DB-->>CategoryService: System categories
+        CategoryService->>DB: Get user categories
+        DB-->>CategoryService: User categories
+        CategoryService->>CategoryService: Build hierarchy
+        CategoryService->>Cache: Store results
+        Cache-->>CategoryService: Cached
+    end
+    CategoryService-->>API: Category list
+    API-->>Client: 200 OK + categories

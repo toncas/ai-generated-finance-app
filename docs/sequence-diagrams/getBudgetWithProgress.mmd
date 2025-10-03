@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant BudgetService
+    participant TransactionService
+    participant DB
+    
+    Client->>API: GET /budgets/{id}
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>BudgetService: Get budget
+    BudgetService->>DB: Get budget details
+    DB-->>BudgetService: Budget data
+    alt Not Found
+        BudgetService-->>API: Not found
+        API-->>Client: 404 Not Found
+    else Budget Found
+        BudgetService->>TransactionService: Calculate spending
+        TransactionService->>DB: Get relevant transactions
+        DB-->>TransactionService: Transactions
+        TransactionService->>TransactionService: Sum by category
+        TransactionService-->>BudgetService: Spending data
+        BudgetService->>BudgetService: Calculate progress
+        BudgetService-->>API: Budget with progress
+        API-->>Client: 200 OK + budget
+    end

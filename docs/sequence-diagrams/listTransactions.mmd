@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant TransactionService
+    participant DB
+    participant Cache
+    
+    Client->>API: GET /transactions?filters
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>TransactionService: Get transactions
+    TransactionService->>Cache: Check cache for query
+    alt Cache Hit
+        Cache-->>TransactionService: Cached results
+    else Cache Miss
+        TransactionService->>DB: Query transactions
+        DB-->>TransactionService: Transaction list
+        TransactionService->>DB: Get category details
+        DB-->>TransactionService: Categories
+        TransactionService->>TransactionService: Calculate summaries
+        TransactionService->>Cache: Store results
+        Cache-->>TransactionService: Cached
+    end
+    TransactionService-->>API: Paginated results
+    API-->>Client: 200 OK + transactions

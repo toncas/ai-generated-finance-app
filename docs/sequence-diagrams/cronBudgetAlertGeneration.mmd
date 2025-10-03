@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant Scheduler
+    participant BudgetService
+    participant DB
+    participant NotificationService
+    
+    Scheduler->>BudgetService: Check budgets
+    BudgetService->>DB: Get active budgets
+    DB-->>BudgetService: Budget list
+    
+    loop For each budget
+        BudgetService->>DB: Calculate current spending
+        DB-->>BudgetService: Spending amount
+        BudgetService->>BudgetService: Check threshold
+        alt Threshold Exceeded
+            BudgetService->>DB: Check existing alert
+            DB-->>BudgetService: Alert status
+            alt No Recent Alert
+                BudgetService->>DB: Create alert
+                DB-->>BudgetService: Alert created
+                BudgetService->>NotificationService: Send notification
+                NotificationService-->>BudgetService: Sent
+            end
+        end
+    end
+    
+    BudgetService-->>Scheduler: Job complete

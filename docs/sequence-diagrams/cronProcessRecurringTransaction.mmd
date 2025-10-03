@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Scheduler
+    participant RecurringService
+    participant DB
+    participant TransactionService
+    participant NotificationService
+    
+    Scheduler->>RecurringService: Execute daily job
+    RecurringService->>DB: Get due templates
+    DB-->>RecurringService: Template list
+    
+    loop For each template
+        RecurringService->>TransactionService: Create transaction
+        TransactionService->>DB: Insert transaction
+        DB-->>TransactionService: Created
+        TransactionService-->>RecurringService: Transaction created
+        RecurringService->>RecurringService: Calculate next occurrence
+        RecurringService->>DB: Update template
+        DB-->>RecurringService: Updated
+        RecurringService->>NotificationService: Queue notification
+        NotificationService-->>RecurringService: Queued
+    end
+    
+    RecurringService->>DB: Log job execution
+    DB-->>RecurringService: Logged
+    RecurringService-->>Scheduler: Job complete

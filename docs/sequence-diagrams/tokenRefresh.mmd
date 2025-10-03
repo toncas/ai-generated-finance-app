@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant JWTService
+    participant DB
+    
+    Client->>API: POST /auth/refresh
+    API->>JWTService: Validate refresh token
+    alt Invalid Token
+        JWTService-->>API: Invalid token
+        API-->>Client: 401 Unauthorized
+    else Valid Token
+        JWTService->>DB: Check token not revoked
+        DB-->>JWTService: Token status
+        alt Token Revoked
+            JWTService-->>API: Token revoked
+            API-->>Client: 401 Unauthorized
+        else Token Valid
+            JWTService->>JWTService: Generate new access token
+            JWTService->>DB: Update token metadata
+            DB-->>JWTService: Updated
+            JWTService-->>API: New tokens
+            API-->>Client: 200 OK + new tokens
+        end
+    end

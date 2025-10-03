@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant Validator
+    participant UserService
+    participant DB
+    participant JWTService
+    
+    Client->>API: POST /auth/register
+    API->>Validator: Validate registration data
+    alt Invalid Data
+        Validator-->>API: Validation errors
+        API-->>Client: 400 Bad Request
+    else Valid Data
+        Validator-->>API: Data valid
+        API->>UserService: Check email exists
+        UserService->>DB: Query user by email
+        DB-->>UserService: User result
+        alt Email Exists
+            UserService-->>API: Email already registered
+            API-->>Client: 409 Conflict
+        else New User
+            UserService->>DB: Create user record
+            DB-->>UserService: User created
+            UserService->>DB: Create default categories
+            DB-->>UserService: Categories created
+            UserService->>JWTService: Generate tokens
+            JWTService-->>UserService: Access & refresh tokens
+            UserService-->>API: User + tokens
+            API-->>Client: 201 Created + tokens
+        end
+    end

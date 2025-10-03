@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant BudgetService
+    participant TransactionService
+    participant DB
+    
+    Client->>API: POST /budgets
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>BudgetService: Create budget
+    BudgetService->>DB: Check existing budget
+    DB-->>BudgetService: Existing budget check
+    alt Budget Exists
+        BudgetService-->>API: Budget already exists
+        API-->>Client: 409 Conflict
+    else No Budget
+        BudgetService->>DB: Insert budget
+        DB-->>BudgetService: Budget created
+        BudgetService->>TransactionService: Calculate current spending
+        TransactionService->>DB: Get month transactions
+        DB-->>TransactionService: Transactions
+        TransactionService-->>BudgetService: Current spending
+        BudgetService->>DB: Update budget with spending
+        DB-->>BudgetService: Updated
+        BudgetService-->>API: Budget created
+        API-->>Client: 201 Created
+    end

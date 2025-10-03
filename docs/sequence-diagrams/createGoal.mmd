@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant GoalService
+    participant DB
+    
+    Client->>API: POST /goals
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>GoalService: Create goal
+    GoalService->>GoalService: Calculate metrics
+    Note over GoalService: Monthly contribution needed,<br/>days until target, etc.
+    GoalService->>DB: Insert goal
+    DB-->>GoalService: Goal created
+    GoalService-->>API: Goal created
+    API-->>Client: 201 Created

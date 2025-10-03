@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant AnalyticsService
+    participant DB
+    
+    Client->>API: GET /analytics/spending?group_by=category
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>AnalyticsService: Get spending analytics
+    AnalyticsService->>DB: Query transactions
+    DB-->>AnalyticsService: Transaction data
+    AnalyticsService->>DB: Get category details
+    DB-->>AnalyticsService: Categories
+    AnalyticsService->>AnalyticsService: Group and aggregate
+    AnalyticsService->>AnalyticsService: Calculate percentages
+    AnalyticsService->>AnalyticsService: Build subcategory breakdown
+    AnalyticsService-->>API: Analytics data
+    API-->>Client: 200 OK + analytics

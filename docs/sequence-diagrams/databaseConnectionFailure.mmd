@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant Service
+    participant DB
+    participant CircuitBreaker
+    participant Logger
+    
+    Client->>API: Any request
+    API->>Service: Process request
+    Service->>CircuitBreaker: Check status
+    alt Circuit Open
+        CircuitBreaker-->>Service: Service unavailable
+        Service-->>API: 503 Service Unavailable
+    else Circuit Closed
+        Service->>DB: Query database
+        DB--xService: Connection timeout
+        Service->>CircuitBreaker: Record failure
+        CircuitBreaker->>CircuitBreaker: Increment counter
+        alt Threshold Reached
+            CircuitBreaker->>CircuitBreaker: Open circuit
+        end
+        Service->>Logger: Log error
+        Logger-->>Service: Logged
+        Service-->>API: 500 Internal Error
+    end
+    API-->>Client: Error response

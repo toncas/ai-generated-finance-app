@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant GoalService
+    participant TransactionService
+    participant DB
+    
+    Client->>API: POST /goals/{id}/contributions
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>GoalService: Add contribution
+    GoalService->>DB: Get goal
+    DB-->>GoalService: Goal data
+    GoalService->>DB: Insert contribution
+    DB-->>GoalService: Contribution added
+    GoalService->>GoalService: Update goal amount
+    GoalService->>DB: Update goal
+    DB-->>GoalService: Updated
+    alt Create Transaction
+        GoalService->>TransactionService: Create savings transaction
+        TransactionService->>DB: Insert transaction
+        DB-->>TransactionService: Created
+        TransactionService-->>GoalService: Transaction created
+    end
+    alt Goal Complete
+        GoalService->>DB: Update goal status
+        DB-->>GoalService: Status updated
+    end
+    GoalService-->>API: Goal updated
+    API-->>Client: 201 Created

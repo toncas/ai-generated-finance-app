@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant AnalyticsService
+    participant TrendService
+    participant DB
+    
+    Client->>API: GET /analytics/trends?months=6
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>AnalyticsService: Get trends
+    AnalyticsService->>DB: Get monthly aggregates
+    DB-->>AnalyticsService: Monthly data
+    AnalyticsService->>TrendService: Analyze trends
+    TrendService->>TrendService: Calculate moving averages
+    TrendService->>TrendService: Detect anomalies
+    TrendService->>TrendService: Identify patterns
+    Note over TrendService: Increasing/decreasing trends,<br/>seasonal patterns, outliers
+    TrendService-->>AnalyticsService: Trend insights
+    AnalyticsService-->>API: Trends and insights
+    API-->>Client: 200 OK + trends

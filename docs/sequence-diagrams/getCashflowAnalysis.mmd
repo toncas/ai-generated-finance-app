@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant AnalyticsService
+    participant ForecastService
+    participant DB
+    
+    Client->>API: GET /analytics/cashflow?include_forecast=true
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>AnalyticsService: Get cash flow
+    AnalyticsService->>DB: Get transactions by period
+    DB-->>AnalyticsService: Historical data
+    AnalyticsService->>AnalyticsService: Calculate running balance
+    alt Include Forecast
+        AnalyticsService->>ForecastService: Generate forecast
+        ForecastService->>DB: Get recurring templates
+        DB-->>ForecastService: Templates
+        ForecastService->>ForecastService: Project transactions
+        ForecastService-->>AnalyticsService: Forecast data
+        AnalyticsService->>AnalyticsService: Merge historical + forecast
+    end
+    AnalyticsService-->>API: Cash flow analysis
+    API-->>Client: 200 OK + analysis

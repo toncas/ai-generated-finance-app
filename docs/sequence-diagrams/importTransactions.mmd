@@ -1,0 +1,39 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant ImportService
+    participant ValidationService
+    participant DB
+    
+    Client->>API: POST /data/import (CSV file)
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>ImportService: Process import
+    ImportService->>ImportService: Parse CSV
+    ImportService->>ImportService: Apply column mapping
+    ImportService->>ValidationService: Validate batch
+    
+    loop For each row
+        ValidationService->>ValidationService: Validate row
+        alt Valid Row
+            ValidationService->>DB: Check duplicate
+            DB-->>ValidationService: Duplicate status
+            alt Not Duplicate
+                ValidationService->>DB: Map to category
+                DB-->>ValidationService: Category mapped
+                ValidationService->>DB: Insert transaction
+                DB-->>ValidationService: Created
+            else Duplicate
+                ValidationService->>ValidationService: Mark as duplicate
+            end
+        else Invalid Row
+            ValidationService->>ValidationService: Log error
+        end
+    end
+    
+    ValidationService-->>ImportService: Import results
+    ImportService->>DB: Log import summary
+    DB-->>ImportService: Logged
+    ImportService-->>API: Import results
+    API-->>Client: 200 OK + results

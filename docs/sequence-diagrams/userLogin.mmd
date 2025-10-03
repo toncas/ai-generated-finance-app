@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthService
+    participant DB
+    participant JWTService
+    
+    Client->>API: POST /auth/login
+    API->>AuthService: Validate credentials
+    AuthService->>DB: Get user by email
+    DB-->>AuthService: User data
+    alt Invalid Credentials
+        AuthService-->>API: Invalid credentials
+        API-->>Client: 401 Unauthorized
+    else Valid Credentials
+        AuthService->>AuthService: Verify password hash
+        AuthService->>JWTService: Generate tokens
+        JWTService-->>AuthService: Access & refresh tokens
+        AuthService->>DB: Log authentication event
+        DB-->>AuthService: Event logged
+        AuthService-->>API: User + tokens
+        API-->>Client: 200 OK + tokens
+    end

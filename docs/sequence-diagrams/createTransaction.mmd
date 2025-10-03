@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant Validator
+    participant TransactionService
+    participant BudgetService
+    participant DB
+    
+    Client->>API: POST /transactions
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>Validator: Validate transaction data
+    alt Invalid Data
+        Validator-->>API: Validation errors
+        API-->>Client: 400 Bad Request
+    else Valid Data
+        Validator-->>API: Data valid
+        API->>TransactionService: Create transaction
+        TransactionService->>DB: Verify category exists
+        DB-->>TransactionService: Category valid
+        TransactionService->>DB: Insert transaction
+        DB-->>TransactionService: Transaction created
+        TransactionService->>BudgetService: Check budget impact
+        BudgetService->>DB: Get relevant budgets
+        DB-->>BudgetService: Budget data
+        BudgetService->>BudgetService: Calculate new spending
+        alt Over Budget
+            BudgetService->>DB: Create budget alert
+            DB-->>BudgetService: Alert created
+        end
+        BudgetService-->>TransactionService: Budget updated
+        TransactionService->>Cache: Invalidate related caches
+        Cache-->>TransactionService: Invalidated
+        TransactionService-->>API: Transaction created
+        API-->>Client: 201 Created
+    end

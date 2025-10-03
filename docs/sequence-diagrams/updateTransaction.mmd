@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant TransactionService
+    participant BudgetService
+    participant DB
+    
+    Client->>API: PUT /transactions/{id}
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>TransactionService: Update transaction
+    TransactionService->>DB: Get existing transaction
+    DB-->>TransactionService: Transaction data
+    alt Not Found or Not Owner
+        TransactionService-->>API: Not found/forbidden
+        API-->>Client: 404/403 Error
+    else Transaction Found
+        TransactionService->>DB: Update transaction
+        DB-->>TransactionService: Updated
+        TransactionService->>BudgetService: Recalculate budget
+        BudgetService->>DB: Update budget spending
+        DB-->>BudgetService: Updated
+        BudgetService-->>TransactionService: Budget adjusted
+        TransactionService->>Cache: Invalidate caches
+        Cache-->>TransactionService: Invalidated
+        TransactionService-->>API: Transaction updated
+        API-->>Client: 200 OK
+    end

@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthMiddleware
+    participant CategoryService
+    participant DB
+    
+    Client->>API: POST /categories
+    API->>AuthMiddleware: Verify JWT
+    AuthMiddleware-->>API: User authenticated
+    API->>CategoryService: Create category
+    CategoryService->>DB: Check name uniqueness
+    DB-->>CategoryService: Name check result
+    alt Name Exists
+        CategoryService-->>API: Duplicate name
+        API-->>Client: 409 Conflict
+    else Name Available
+        CategoryService->>DB: Insert category
+        DB-->>CategoryService: Category created
+        CategoryService->>Cache: Invalidate cache
+        Cache-->>CategoryService: Invalidated
+        CategoryService-->>API: Category created
+        API-->>Client: 201 Created
+    end
