@@ -1,3 +1,25 @@
+# Auto detect text files
+* text=auto
+
+# Python files
 *.py text eol=lf
-*.md text
-*.yaml text
+*.pyi text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Config files
+*.ini text eol=lf
+*.cfg text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+
+# Git
+.gitattributes text eol=lf
+.gitignore text eol=lf
