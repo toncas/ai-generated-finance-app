@@ -1,0 +1,20 @@
+ taskId,taskTitle,status
+TASK-001,Repository Bootstrap & README Quickstart,TO DO
+TASK-002,CI: Docs & OpenAPI Validation,TO DO
+TASK-003,ADR: Database Strategy,TO DO
+TASK-004,API Skeleton Generation,TO DO
+TASK-005,Testing Scaffold and Smoke Tests,TO DO
+TASK-006,Pre-commit hooks and Linters,TO DO
+TASK-007,Secret Management and Scanning,TO DO
+TASK-008,DB Index Creation and Migration Job,TO DO
+TASK-009,Celery & Redis: Background Jobs,TO DO
+TASK-010,Analytics Service for Spending Insights,TO DO
+TASK-011,CSV Import/Export and Schema Validation,TO DO
+TASK-012,Budgets & Alerts,TO DO
+TASK-013,Authentication, Authorization, and Security,TO DO
+TASK-014,Logging, Metrics, and Health Checks,TO DO
+TASK-015,CI/CD Pipeline and Deployment Configuration,TO DO
+TASK-016,Compliance and Audit Trails,TO DO
+TASK-017,Performance and Load Testing,TO DO
+TASK-018,Client SDK and API Contracts,TO DO
+TASK-019,Migration Plan & Task Prioritization,TO DO
